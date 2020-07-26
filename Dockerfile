@@ -1,3 +1,3 @@
-FROM nginx:stable
+FROM nginx
 
-COPY src/* /usr/share/nginx/html/
+COPY . /usr/share/nginx/html/
