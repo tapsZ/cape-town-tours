@@ -264,6 +264,7 @@ fieldset[disabled] .btn-xl.active {
 html,
 body {
     height: 100%;
+    max-width: 100%;
 }
 
 .carousel,
@@ -717,6 +718,7 @@ section#contact .text-danger {
 }
 
 footer {
+    max-width: 100%;
     padding: 25px 0;
     text-align: center;
 }
