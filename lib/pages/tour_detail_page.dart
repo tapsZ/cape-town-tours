@@ -244,27 +244,52 @@ class _HighlightsIncluded extends StatelessWidget {
           children: tour.highlights.map((h) => _Tag(label: h)).toList(),
         ),
         const SizedBox(height: 60),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _IconList(
-                title: 'What\'s Included',
-                items: tour.included,
-                icon: Icons.check_circle_outline,
-                iconColor: Colors.green,
-              ),
-            ),
-            const SizedBox(width: 30),
-            Expanded(
-              child: _IconList(
-                title: 'What to Bring',
-                items: tour.whatToBring,
-                icon: Icons.info_outline,
-                iconColor: AppTheme.accentOrange,
-              ),
-            ),
-          ],
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobileLayout = constraints.maxWidth < 700;
+            if (isMobileLayout) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _IconList(
+                    title: 'What\'s Included',
+                    items: tour.included,
+                    icon: Icons.check_circle_outline,
+                    iconColor: Colors.green,
+                  ),
+                  const SizedBox(height: 40),
+                  _IconList(
+                    title: 'What to Bring',
+                    items: tour.whatToBring,
+                    icon: Icons.info_outline,
+                    iconColor: AppTheme.accentOrange,
+                  ),
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _IconList(
+                    title: 'What\'s Included',
+                    items: tour.included,
+                    icon: Icons.check_circle_outline,
+                    iconColor: Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 30),
+                Expanded(
+                  child: _IconList(
+                    title: 'What to Bring',
+                    items: tour.whatToBring,
+                    icon: Icons.info_outline,
+                    iconColor: AppTheme.accentOrange,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ],
     );

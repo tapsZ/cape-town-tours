@@ -18,13 +18,13 @@ class SocialProofSection extends StatelessWidget {
       child: Column(
         children: [
           // Trust Badges
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            spacing: isMobile ? 20 : 40,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
             children: [
               _TrustBadge(icon: Icons.verified, label: 'TripAdvisor 2024'),
-              const SizedBox(width: 40),
               _TrustBadge(icon: Icons.star_rate, label: '5.0 Google Rating'),
-              const SizedBox(width: 40),
               _TrustBadge(icon: Icons.security, label: 'Secure Booking'),
             ],
           ).animate().fadeIn(delay: 200.ms),
@@ -32,8 +32,8 @@ class SocialProofSection extends StatelessWidget {
 
           // Stats Counter
           Wrap(
-            spacing: 40,
-            runSpacing: 40,
+            spacing: isMobile ? 20 : 40,
+            runSpacing: 30,
             alignment: WrapAlignment.center,
             children: [
               _StatItem(value: '500+', label: 'Happy Tourists'),
@@ -47,6 +47,7 @@ class SocialProofSection extends StatelessWidget {
           // Testimonial Headline
           Text(
             'What Our Guests Say',
+            textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: isMobile ? 32 : 48,
@@ -57,7 +58,7 @@ class SocialProofSection extends StatelessWidget {
           // Testimonial Carousel
           CarouselSlider(
             options: CarouselOptions(
-              height: 300,
+              height: isMobile ? 320 : 300,
               viewportFraction: isMobile ? 1.0 : 0.45,
               autoPlay: true,
               enlargeCenterPage: true,

@@ -90,7 +90,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               _NavBarAction(
                 label: 'GUIDES',
-                onPressed: () => _scrollToSection(context, 'team'),
+                onPressed: () => context.go('/guides'),
               ),
               _NavBarAction(
                 label: 'CONTACT',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../config/app_theme.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../config/app_theme.dart';
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
@@ -86,6 +87,18 @@ class Footer extends StatelessWidget {
         ),
       ),
       _FooterSection(
+        title: 'QUICK LINKS',
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _FooterLinkButton(label: 'Home', onPressed: () => context.go('/')),
+            _FooterLinkButton(label: 'Our Tours', onPressed: () => context.go('/')),
+            _FooterLinkButton(label: 'Our Guides', onPressed: () => context.go('/guides')),
+            _FooterLinkButton(label: 'Contact Us', onPressed: () => context.go('/contact')),
+          ],
+        ),
+      ),
+      _FooterSection(
         title: 'CONTACT',
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,18 +109,28 @@ class Footer extends StatelessWidget {
           ],
         ),
       ),
-      _FooterSection(
-        title: 'BUSINESS HOURS',
-        content: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _TimeRow(day: 'Mon - Fri', time: '08:00 - 18:00'),
-            _TimeRow(day: 'Saturday', time: '09:00 - 16:00'),
-            _TimeRow(day: 'Sunday', time: 'Closed (Tours Only)'),
-          ],
+    ];
+  }
+}
+
+class _FooterLinkButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const _FooterLinkButton({required this.label, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: InkWell(
+        onTap: onPressed,
+        child: Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
         ),
       ),
-    ];
+    );
   }
 }
 
@@ -172,24 +195,6 @@ class _ContactRow extends StatelessWidget {
   }
 }
 
-class _TimeRow extends StatelessWidget {
-  final String day;
-  final String time;
-
-  const _TimeRow({required this.day, required this.time});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(day, style: const TextStyle(color: Colors.white54, fontSize: 14)),
-          Text(time, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-        ],
-      ),
-    );
   }
 }
 

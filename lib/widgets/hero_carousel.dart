@@ -95,15 +95,16 @@ class HeroCarousel extends StatelessWidget {
                     .fadeIn(duration: 800.ms)
                     .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
                 const SizedBox(height: 48),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 20,
+                  runSpacing: 20,
                   children: [
                     _HeroButton(
                       text: 'VIEW TOURS',
                       onPressed: () => onScrollToTours?.call(),
                       isPrimary: true,
                     ),
-                    const SizedBox(width: 20),
                     _HeroButton(
                       text: 'CONTACT US',
                       onPressed: () => context.go('/contact'),
@@ -155,7 +156,10 @@ class _HeroButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: isPrimary ? AppTheme.primaryBlue : Colors.white24,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 22),
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width < 600 ? 24 : 32,
+            vertical: MediaQuery.of(context).size.width < 600 ? 18 : 22,
+          ),
           side: isPrimary ? null : const BorderSide(color: Colors.white, width: 2),
           elevation: 0,
         ),

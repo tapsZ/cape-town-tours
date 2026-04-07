@@ -5,6 +5,7 @@ import 'config/app_theme.dart';
 import 'pages/home_page.dart';
 import 'pages/tour_detail_page.dart';
 import 'pages/contact_page.dart';
+import 'pages/guides_page.dart';
 
 void main() {
   setPathUrlStrategy();
@@ -28,6 +29,10 @@ class CapeBestToursApp extends StatelessWidget {
             final slug = state.pathParameters['slug']!;
             return TourDetailPage(slug: slug);
           },
+        ),
+        GoRoute(
+          path: '/guides',
+          builder: (context, state) => const GuidesPage(),
         ),
         GoRoute(
           path: '/contact',

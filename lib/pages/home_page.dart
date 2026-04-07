@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../core/widgets/nav_bar.dart';
 import '../core/widgets/footer.dart';
 import '../widgets/hero_carousel.dart';
@@ -124,7 +125,7 @@ class _HomePageState extends State<HomePage> {
               label: 'GUIDES',
               onTap: () {
                 Navigator.pop(context);
-                _scrollToSection(_teamKey);
+                context.go('/guides');
               },
             ),
             _DrawerItem(

@@ -149,7 +149,7 @@ class _ServiceCardState extends State<_ServiceCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width < 600 ? 25 : 40),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),

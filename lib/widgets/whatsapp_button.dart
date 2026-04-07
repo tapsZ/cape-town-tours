@@ -14,15 +14,16 @@ class WhatsAppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 600;
     return Positioned(
-      bottom: 30,
-      right: 30,
+      bottom: isSmall ? 20 : 30,
+      right: isSmall ? 20 : 30,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           onTap: _launchWhatsApp,
           child: Container(
-            width: 60,
+            width: isSmall ? 54 : 60,
             height: 60,
             decoration: BoxDecoration(
               color: const Color(0xFF25D366),
