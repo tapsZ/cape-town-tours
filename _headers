@@ -1,0 +1,15 @@
+# Cloudflare Pages Headers Configuration
+# This file configures CSP headers for Cape Best Tours deployment
+
+/*
+  # Modern WebAssembly-Compatible Content Security Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data:; connect-src 'self' blob: https://www.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com; object-src 'self'; worker-src 'self' blob:; frame-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  
+  # Security Headers
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Permitted-Cross-Domain-Policies: none
+  
+  # Public site - allow indexing
+  X-Robots-Tag: index, follow
