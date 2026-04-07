@@ -6,6 +6,9 @@ import '../widgets/services_section.dart';
 import '../widgets/tours_grid.dart';
 import '../widgets/team_section.dart';
 import '../widgets/cta_section.dart';
+import '../widgets/social_proof_section.dart';
+import '../widgets/whatsapp_button.dart';
+import '../config/app_theme.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,15 +19,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey _servicesKey = GlobalKey();
-  final GlobalKey _portfolioKey = GlobalKey();
+  final GlobalKey _toursKey = GlobalKey();
   final GlobalKey _teamKey = GlobalKey();
 
   void _scrollToSection(GlobalKey key) {
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
+    if (key.currentContext != null) {
+      Scrollable.ensureVisible(
+        key.currentContext!,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOutCubic,
+      );
+    }
   }
 
   @override
@@ -33,21 +38,134 @@ class _HomePageState extends State<HomePage> {
       extendBodyBehindAppBar: true,
       appBar: NavBar(
         onScrollToServices: () => _scrollToSection(_servicesKey),
-        onScrollToPortfolio: () => _scrollToSection(_portfolioKey),
+        onScrollToTours: () => _scrollToSection(_toursKey),
         onScrollToTeam: () => _scrollToSection(_teamKey),
       ),
-      body: SingleChildScrollView(
+      endDrawer: _buildMobileDrawer(context),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                HeroCarousel(onScrollToTours: () => _scrollToSection(_toursKey)),
+                ServicesSection(key: _servicesKey),
+                ToursGrid(key: _toursKey),
+                const SocialProofSection(),
+                TeamSection(key: _teamKey),
+                const CTASection(),
+                const Footer(),
+              ],
+            ),
+          ),
+          const WhatsAppButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileDrawer(BuildContext context) {
+    return Drawer(
+      child: Container(
+        color: Colors.white,
         child: Column(
           children: [
-            const HeroCarousel(),
-            ServicesSection(key: _servicesKey),
-            ToursGrid(key: _portfolioKey),
-            TeamSection(key: _teamKey),
-            const CTASection(),
-            const Footer(),
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: AppTheme.primaryBlue,
+              ),
+              child: Center(
+                child: Text(
+                  'CAPE BEST TOURS',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+              ),
+            ),
+            _DrawerItem(
+              icon: Icons.home,
+              label: 'HOME',
+              onTap: () {
+                Navigator.pop(context);
+                // Already here
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.settings,
+              label: 'SERVICES',
+              onTap: () {
+                Navigator.pop(context);
+                _scrollToSection(_servicesKey);
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.explore,
+              label: 'TOURS',
+              onTap: () {
+                Navigator.pop(context);
+                _scrollToSection(_toursKey);
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.people,
+              label: 'GUIDES',
+              onTap: () {
+                Navigator.pop(context);
+                _scrollToSection(_teamKey);
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.contact_support,
+              label: 'CONTACT',
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to contact
+              },
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text('BOOK NOW'),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: AppTheme.primaryBlue),
+      title: Text(
+        label,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+}
+

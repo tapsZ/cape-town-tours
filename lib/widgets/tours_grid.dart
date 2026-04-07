@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/tour_data.dart';
+import '../config/app_theme.dart';
 import 'tour_card.dart';
 
 class ToursGrid extends StatelessWidget {
@@ -8,48 +9,74 @@ class ToursGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[100],
+      color: const Color(0xFFF8F9FA),
       padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 20),
-      child: Column(
-        children: [
-          Text(
-            'OUR TOURS',
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Explore the best of Cape Town with our expert guides.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontStyle: FontStyle.italic,
+                child: const Text(
+                  'OUR TOURS',
+                  style: TextStyle(
+                    color: AppTheme.primaryBlue,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
                 ),
-          ),
-          const SizedBox(height: 60),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              int crossAxisCount = 1;
-              if (constraints.maxWidth > 700) crossAxisCount = 2;
-              if (constraints.maxWidth > 1100) crossAxisCount = 3;
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Unforgettable Experiences\nAwaiting You',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Choose from our curated selection of Cape Town\'s most breathtaking tours',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 50),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  int crossAxisCount = 1;
+                  if (constraints.maxWidth > 700) crossAxisCount = 2;
+                  if (constraints.maxWidth > 1000) crossAxisCount = 3;
 
-              return GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 30,
-                  mainAxisSpacing: 30,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: TourData.tours.length,
-                itemBuilder: (context, index) {
-                  return TourCard(tour: TourData.tours[index]);
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 24,
+                      mainAxisSpacing: 24,
+                      childAspectRatio: 0.72,
+                    ),
+                    itemCount: TourData.tours.length,
+                    itemBuilder: (context, index) {
+                      return TourCard(tour: TourData.tours[index]);
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

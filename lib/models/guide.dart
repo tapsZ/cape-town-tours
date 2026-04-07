@@ -5,18 +5,20 @@ class Guide extends Equatable {
   final String name;
   final String experience;
   final String imagePath;
-  final String twitterUrl;
-  final String facebookUrl;
-  final String linkedinUrl;
+  final String bio;
+  final List<String> languages;
+  final String specialty;
+  final bool isFeatured;
 
   const Guide({
     required this.id,
     required this.name,
     required this.experience,
     required this.imagePath,
-    this.twitterUrl = '#',
-    this.facebookUrl = '#',
-    this.linkedinUrl = '#',
+    this.bio = '',
+    this.languages = const ['English'],
+    this.specialty = '',
+    this.isFeatured = false,
   });
 
   @override
