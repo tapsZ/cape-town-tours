@@ -61,6 +61,13 @@ class Footer extends StatelessWidget {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 60,
+              fit: BoxFit.contain,
+              color: Colors.white, // Invert for dark footer
+            ),
+            const SizedBox(height: 20),
             const Text(
               'Providing premium, authentic Cape Town experiences for over 20 years. Licensed and registered professional guides.',
               style: TextStyle(color: Colors.white70, height: 1.6),
@@ -84,7 +91,7 @@ class Footer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _ContactRow(icon: Icons.location_on, label: 'Cape Town, South Africa', isLink: true),
-            _ContactRow(icon: Icons.phone, label: '+27 83 669 4518', isLink: true),
+            _ContactRow(icon: Icons.phone, label: '+27 12 345 6789', isLink: true),
             _ContactRow(icon: Icons.email, label: 'info@capebesttours.com', isLink: true),
           ],
         ),

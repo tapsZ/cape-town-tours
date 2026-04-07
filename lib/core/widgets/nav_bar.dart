@@ -26,31 +26,42 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: false,
       leading: isMobile ? null : const SizedBox.shrink(),
       leadingWidth: isMobile ? null : 0,
-       title: InkWell(
+        title: InkWell(
           onTap: () => context.go('/'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "CAPE BEST TOURS",
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: AppTheme.primaryBlue,
-                      fontSize: isMobile ? 18 : 24,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
+              Image.asset(
+                'assets/images/logo.png',
+                height: 40,
+                fit: BoxFit.contain,
               ),
-              if (!isMobile)
-                const Text(
-                  'Authentic Cape Town Experiences',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppTheme.textLight,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 1,
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "CAPE BEST TOURS",
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          color: AppTheme.primaryBlue,
+                          fontSize: isMobile ? 18 : 22,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
                   ),
-                ),
+                  if (!isMobile)
+                    const Text(
+                      'Authentic Cape Town Experiences',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.textLight,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),

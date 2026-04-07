@@ -74,13 +74,24 @@ class _HomePageState extends State<HomePage> {
                 color: AppTheme.primaryBlue,
               ),
               child: Center(
-                child: Text(
-                  'CAPE BEST TOURS',
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                      ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo.png',
+                      height: 50,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'CAPE BEST TOURS',
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                          ),
+                    ),
+                  ],
                 ),
               ),
             ),
