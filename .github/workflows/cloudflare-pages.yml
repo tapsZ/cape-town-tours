@@ -34,8 +34,10 @@ jobs:
       - name: Build Flutter Web with CSP support
         run: flutter build web --csp
 
-      - name: Copy custom headers to build directory
-        run: cp _headers build/web/
+      - name: Copy custom headers and redirects to build directory
+        run: |
+          cp _headers build/web/
+          cp _redirects build/web/
 
       - name: Deploy to Cloudflare Pages
         if: github.event_name == 'push'

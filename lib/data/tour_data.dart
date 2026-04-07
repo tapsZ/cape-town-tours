@@ -7,7 +7,7 @@ class TourData {
       id: '1',
       slug: 'cape-town-city',
       title: 'Cape Town City',
-      imagePath: 'images/portfolio/Cape-Town-City.jpg',
+      imagePath: 'assets/images/portfolio/Cape-Town-City.jpg',
       description: 'Visit the Castle Of Good Hope, City Hall, Grand Parade, District Six Museum, and the Malay Quarter. Ascend to the top and marvel at the view to Kloof Nek and Table Mountain and see the Robben Island where Nelson Mandela was imprisoned.',
       highlights: [
         'Table Mountain',

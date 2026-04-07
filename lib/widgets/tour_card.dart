@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/tour.dart';
-import '../config/app_theme.dart';
 
 class TourCard extends StatelessWidget {
   final Tour tour;

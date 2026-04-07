@@ -64,7 +64,7 @@ class _TourHeader extends StatelessWidget {
         Container(
           width: double.infinity,
           height: 400,
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withValues(alpha: 0.4),
           child: Center(
             child: Text(
               tour.title.toUpperCase(),
@@ -230,8 +230,8 @@ class _HighlightChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
       decoration: BoxDecoration(
-        color: AppTheme.primaryBlue.withOpacity(0.05),
-        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+        color: AppTheme.primaryBlue.withValues(alpha: 0.05),
+        border: Border.all(color: AppTheme.primaryBlue.withValues(alpha: 0.2)),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../config/app_theme.dart';
 
 class Footer extends StatelessWidget {

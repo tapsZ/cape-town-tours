@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cape-best-tours.pages.dev/sitemap.xml
+Sitemap: https://capebesttours.com/sitemap.xml

@@ -3,20 +3,32 @@ import 'package:go_router/go_router.dart';
 import '../../config/app_theme.dart';
 
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
-  const NavBar({super.key});
+  final VoidCallback? onScrollToServices;
+  final VoidCallback? onScrollToPortfolio;
+  final VoidCallback? onScrollToTeam;
+
+  const NavBar({
+    super.key,
+    this.onScrollToServices,
+    this.onScrollToPortfolio,
+    this.onScrollToTeam,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white.withOpacity(0.9),
+      color: Colors.white.withValues(alpha: 0.9),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: AppBar(
-        title: Text(
-          "Cape Town's Best Tours",
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: AppTheme.primaryBlue,
-                fontSize: 24,
-              ),
+        title: InkWell(
+          onTap: () => context.go('/'),
+          child: Text(
+            "Cape Town's Best Tours",
+            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  color: AppTheme.primaryBlue,
+                  fontSize: 24,
+                ),
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -46,9 +58,19 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
     // If we're not on the home page, go there first
     if (GoRouterState.of(context).uri.path != '/') {
       context.go('/');
-      // In a real app, you'd handle the scroll after navigation
+      // The home page will handle the scroll via the keys
     } else {
-      // Logic to scroll to section would go here
+      switch (sectionId) {
+        case 'services':
+          onScrollToServices?.call();
+          break;
+        case 'portfolio':
+          onScrollToPortfolio?.call();
+          break;
+        case 'team':
+          onScrollToTeam?.call();
+          break;
+      }
     }
   }
 

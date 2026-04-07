@@ -143,7 +143,7 @@ class _DetailItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: AppTheme.primaryBlue.withOpacity(0.1),
+            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: AppTheme.primaryBlue, size: 28),
@@ -168,8 +168,59 @@ class _DetailItem extends StatelessWidget {
   }
 }
 
-class _ContactForm extends StatelessWidget {
+class _ContactForm extends StatefulWidget {
   const _ContactForm();
+
+  @override
+  State<_ContactForm> createState() => _ContactFormState();
+}
+
+class _ContactFormState extends State<_ContactForm> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _messageController = TextEditingController();
+
+  Future<void> _sendMessage() async {
+    final name = _nameController.text;
+    final email = _emailController.text;
+    final message = _messageController.text;
+
+    if (name.isEmpty || email.isEmpty || message.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields.')),
+      );
+      return;
+    }
+
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'info@capebesttours.com',
+      query: encodeQueryParameters(<String, String>{
+        'subject': 'Inquiry from $name',
+        'body': 'Name: $name\nEmail: $email\n\nMessage:\n$message',
+      }),
+    );
+
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Opening your email client...')),
+      );
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not launch email client.')),
+      );
+    }
+  }
+
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,30 +231,34 @@ class _ContactForm extends StatelessWidget {
         padding: const EdgeInsets.all(40),
         child: Column(
           children: [
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
                 labelText: 'Your Name *',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
                 labelText: 'Your Email *',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
-            const TextField(
+            TextField(
+              controller: _messageController,
               maxLines: 5,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Your Message *',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: _sendMessage,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 60),
               ),
@@ -213,5 +268,13 @@ class _ContactForm extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _messageController.dispose();
+    super.dispose();
   }
 }

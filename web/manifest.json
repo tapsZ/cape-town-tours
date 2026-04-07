@@ -1,11 +1,9 @@
 {
-    "name": "cape_best_tours",
-    "short_name": "cape_best_tours",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "name": "Cape Best Tours",
+    "short_name": "Cape Best",
+    "background_color": "#F5F5F5",
+    "theme_color": "#005696",
+    "description": "Premium guided tours across Cape Town and the Western Cape.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
