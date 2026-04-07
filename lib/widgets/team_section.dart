@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart' as cs;
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../data/tour_data.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../logic/cape_tours_cubit.dart';
+import '../logic/cape_tours_state.dart';
 import '../config/app_theme.dart';
+import '../models/guide.dart';
 import 'guide_card.dart';
 
 class TeamSection extends StatelessWidget {
@@ -14,9 +17,6 @@ class TeamSection extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 900;
     
-    // Show up to 8 featured guides in the carousel
-    final featuredGuides = TourData.guides.where((g) => g.isFeatured).toList();
-
     return Container(
       padding: EdgeInsets.symmetric(vertical: 100, horizontal: isMobile ? 20 : 60),
       color: AppTheme.backgroundLight,
@@ -41,21 +41,38 @@ class TeamSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 60),
-          cs.CarouselSlider(
-            options: cs.CarouselOptions(
-              height: isMobile ? 550 : 600,
-              viewportFraction: isMobile ? 1.0 : 0.33,
-              enlargeCenterPage: true,
-              autoPlay: true,
-              autoPlayInterval: const Duration(seconds: 5),
-              enableInfiniteScroll: featuredGuides.length > 3,
-            ),
-            items: featuredGuides.map((guide) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: GuideCard(guide: guide),
+          BlocBuilder<CapeToursCubit, CapeToursState>(
+            builder: (context, state) {
+              if (state is CapeToursLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              List<Guide> featuredGuides = [];
+              if (state is CapeToursLoaded) {
+                featuredGuides = state.guides.where((g) => g.isFeatured).toList();
+              }
+
+              if (featuredGuides.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return cs.CarouselSlider(
+                options: cs.CarouselOptions(
+                  height: isMobile ? 550 : 600,
+                  viewportFraction: isMobile ? 1.0 : 0.33,
+                  enlargeCenterPage: true,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 5),
+                  enableInfiniteScroll: featuredGuides.length > 3,
+                ),
+                items: featuredGuides.map((guide) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: GuideCard(guide: guide),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
           const SizedBox(height: 60),
           ElevatedButton(

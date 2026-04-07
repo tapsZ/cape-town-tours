@@ -47,10 +47,17 @@ class _TourCardState extends State<TourCard> {
                   children: [
                     AspectRatio(
                       aspectRatio: 4 / 3,
-                      child: Image.asset(
-                        widget.tour.imagePath,
-                        fit: BoxFit.cover,
-                      ),
+                      child: widget.tour.imagePath.startsWith('http')
+                          ? Image.network(
+                              widget.tour.imagePath,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Center(child: Icon(Icons.error)),
+                            )
+                          : Image.asset(
+                              widget.tour.imagePath,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                     if (widget.tour.isMostPopular)
                       Positioned(

@@ -40,9 +40,19 @@ class Footer extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      _FooterLink(label: 'Privacy', onPressed: () {}),
+                      _FooterLink(
+                        label: 'Privacy',
+                        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Privacy Policy coming soon.')),
+                        ),
+                      ),
                       const SizedBox(width: 20),
-                      _FooterLink(label: 'Terms', onPressed: () {}),
+                      _FooterLink(
+                        label: 'Terms',
+                        onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Terms of Service coming soon.')),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -102,9 +112,21 @@ class Footer extends StatelessWidget {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _ContactRow(icon: Icons.location_on, label: 'Cape Town, South Africa', isLink: true),
-            _ContactRow(icon: Icons.phone, label: '+27 12 345 6789', isLink: true),
-            _ContactRow(icon: Icons.email, label: 'info@capebesttours.com', isLink: true),
+            _ContactRow(
+              icon: Icons.location_on,
+              label: 'Cape Town, South Africa',
+              onTap: () => launchUrl(Uri.parse('https://maps.google.com/?q=Cape+Town')),
+            ),
+            _ContactRow(
+              icon: Icons.phone,
+              label: '+27 12 345 6789',
+              onTap: () => launchUrl(Uri.parse('tel:+27123456789')),
+            ),
+            _ContactRow(
+              icon: Icons.email,
+              label: 'info@capebesttours.com',
+              onTap: () => launchUrl(Uri.parse('mailto:info@capebesttours.com')),
+            ),
           ],
         ),
       ),
@@ -164,9 +186,9 @@ class _FooterSection extends StatelessWidget {
 class _ContactRow extends StatelessWidget {
   final IconData icon;
   final String label;
-  final bool isLink;
+  final VoidCallback? onTap;
 
-  const _ContactRow({required this.icon, required this.label, this.isLink = false});
+  const _ContactRow({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +200,7 @@ class _ContactRow extends StatelessWidget {
           const SizedBox(width: 15),
           Expanded(
             child: InkWell(
-              onTap: isLink ? () {} : null,
+              onTap: onTap,
               child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
             ),
           ),

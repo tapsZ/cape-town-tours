@@ -138,7 +138,7 @@ class _ContactDetails extends StatelessWidget {
           icon: Icons.location_on_outlined,
           title: 'Our Location',
           content: 'Cape Town, South Africa',
-          onTap: () {},
+          onTap: () => launchUrl(Uri.parse('https://maps.google.com/?q=Cape+Town+South+Africa')),
         ),
         const SizedBox(height: 20),
         _DetailCard(
@@ -162,11 +162,20 @@ class _ContactDetails extends StatelessWidget {
         const SizedBox(height: 20),
         Row(
           children: [
-            _SocialIcon(icon: Icons.facebook),
+            _SocialIcon(
+              icon: Icons.facebook,
+              onTap: () => launchUrl(Uri.parse('https://facebook.com/capebesttours')),
+            ),
             const SizedBox(width: 15),
-            _SocialIcon(icon: Icons.camera_alt),
+            _SocialIcon(
+              icon: Icons.camera_alt,
+              onTap: () => launchUrl(Uri.parse('https://instagram.com/capebesttours')),
+            ),
             const SizedBox(width: 15),
-            _SocialIcon(icon: Icons.business),
+            _SocialIcon(
+              icon: Icons.alternate_email,
+              onTap: () => launchUrl(Uri.parse('mailto:info@capebesttours.com')),
+            ),
           ],
         ),
       ],
@@ -243,17 +252,23 @@ class _DetailCard extends StatelessWidget {
 
 class _SocialIcon extends StatelessWidget {
   final IconData icon;
-  const _SocialIcon({required this.icon});
+  final VoidCallback? onTap;
+
+  const _SocialIcon({required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-        shape: BoxShape.circle,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: AppTheme.primaryBlue, size: 20),
       ),
-      child: Icon(icon, color: AppTheme.primaryBlue, size: 20),
     );
   }
 }

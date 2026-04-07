@@ -17,6 +17,8 @@ class Tour extends Equatable {
   final int reviewCount;
   final bool isMostPopular;
   final String category;
+  final String meetingPoint;
+  final int maxCapacity;
 
   const Tour({
     required this.id,
@@ -35,7 +37,41 @@ class Tour extends Equatable {
     this.reviewCount = 0,
     this.isMostPopular = false,
     this.category = 'Adventure',
+    this.meetingPoint = '',
+    this.maxCapacity = 10,
   });
+
+  factory Tour.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> images = json['images'] ?? [];
+    final String mainImage = images.isNotEmpty ? images.first['url'] : '';
+    final List<String> gallery = images.map((e) => e['url'] as String).toList();
+
+    List<String> parseCommaList(String? value) {
+      if (value == null || value.isEmpty) return [];
+      return value.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+
+    return Tour(
+      id: json['id'] ?? '',
+      title: json['name'] ?? '',
+      description: json['description'] ?? '',
+      imagePath: mainImage,
+      galleryImages: gallery,
+      highlights: parseCommaList(json['highlights']),
+      slug: json['slug'] ?? '',
+      priceFrom: (json['price'] as num?)?.toDouble() ?? 0.0,
+      included: parseCommaList(json['included']),
+      whatToBring: parseCommaList(json['whatToBring']),
+      duration: json['durationMinutes'] != null ? '${json['durationMinutes']} min' : 'Full Day',
+      groupSize: json['groupSize'] ?? 'Small Groups',
+      rating: (json['rating'] as num?)?.toDouble() ?? 4.8,
+      reviewCount: json['reviewCount'] ?? 0,
+      isMostPopular: json['isMostPopular'] ?? false,
+      category: json['category'] ?? 'Adventure',
+      meetingPoint: json['meetingPoint'] ?? '',
+      maxCapacity: json['maxCapacity'] ?? 10,
+    );
+  }
 
   @override
   List<Object?> get props => [id, title, slug];

@@ -21,6 +21,24 @@ class Guide extends Equatable {
     this.isFeatured = false,
   });
 
+  factory Guide.fromJson(Map<String, dynamic> json) {
+    List<String> parseCommaList(String? value) {
+      if (value == null || value.isEmpty) return [];
+      return value.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+
+    return Guide(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      experience: json['experience'] ?? '5+ years',
+      imagePath: json['photoUrl'] ?? '',
+      bio: json['bio'] ?? '',
+      languages: parseCommaList(json['languages']),
+      specialty: json['specialties'] ?? '',
+      isFeatured: json['isFeatured'] ?? false,
+    );
+  }
+
   @override
   List<Object?> get props => [id, name];
 }

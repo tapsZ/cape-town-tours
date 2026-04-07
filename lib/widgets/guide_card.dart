@@ -44,7 +44,9 @@ class _GuideCardState extends State<GuideCard> {
               children: [
                 CircleAvatar(
                   radius: 80,
-                  backgroundImage: AssetImage(widget.guide.imagePath),
+                  backgroundImage: widget.guide.imagePath.startsWith('http')
+                      ? NetworkImage(widget.guide.imagePath)
+                      : AssetImage(widget.guide.imagePath) as ImageProvider,
                 ),
                 Positioned(
                   bottom: 0,

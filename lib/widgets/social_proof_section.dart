@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../data/tour_data.dart';
+import '../core/constants/app_constants.dart';
 import '../config/app_theme.dart';
+import 'package:flutter/material.dart' hide CarouselController;
 
 class SocialProofSection extends StatelessWidget {
   const SocialProofSection({super.key});
@@ -64,7 +65,7 @@ class SocialProofSection extends StatelessWidget {
               enlargeCenterPage: true,
               autoPlayInterval: const Duration(seconds: 8),
             ),
-            items: TourData.testimonials.map((testimonial) {
+            items: AppConstants.testimonials.map((testimonial) {
               return Builder(
                 builder: (BuildContext context) {
                   return Container(

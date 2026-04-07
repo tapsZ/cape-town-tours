@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'core/services/api_service.dart';
+import 'logic/cape_tours_cubit.dart';
 import 'config/app_theme.dart';
 import 'pages/home_page.dart';
 import 'pages/tour_detail_page.dart';
@@ -41,11 +44,18 @@ class CapeBestToursApp extends StatelessWidget {
       ],
     );
 
-    return MaterialApp.router(
-      title: 'Cape Best Tours',
-      theme: AppTheme.lightTheme,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => CapeToursCubit(ApiService())..loadData(),
+        ),
+      ],
+      child: MaterialApp.router(
+        title: 'Cape Best Tours',
+        theme: AppTheme.lightTheme,
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

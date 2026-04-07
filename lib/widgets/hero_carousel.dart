@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide CarouselController;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import '../data/tour_data.dart';
+import '../core/constants/app_constants.dart';
 import '../config/app_theme.dart';
 
 class HeroCarousel extends StatelessWidget {
@@ -26,7 +26,7 @@ class HeroCarousel extends StatelessWidget {
             autoPlayAnimationDuration: const Duration(milliseconds: 1200),
             autoPlayCurve: Curves.easeInOutCubic,
           ),
-          items: TourData.heroImages.map((imagePath) {
+          items: AppConstants.heroImages.map((imagePath) {
             return Builder(
               builder: (BuildContext context) {
                 return Stack(

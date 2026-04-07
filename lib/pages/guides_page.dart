@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../logic/cape_tours_cubit.dart';
+import '../logic/cape_tours_state.dart';
 import '../config/app_theme.dart';
 import '../core/widgets/nav_bar.dart';
 import '../core/widgets/footer.dart';
 import '../widgets/guide_card.dart';
 import '../widgets/whatsapp_button.dart';
-import '../data/tour_data.dart';
 import '../models/guide.dart';
 
 class GuidesPage extends StatefulWidget {
@@ -18,28 +20,6 @@ class GuidesPage extends StatefulWidget {
 class _GuidesPageState extends State<GuidesPage> {
   String _searchQuery = '';
   String _selectedSpecialty = 'All';
-  
-  late List<Guide> _allGuides;
-  late List<String> _specialties;
-
-  @override
-  void initState() {
-    super.initState();
-    _allGuides = TourData.guides;
-    _specialties = ['All', ..._allGuides.map((g) => g.specialty).where((s) => s.isNotEmpty).toSet()];
-  }
-
-  List<Guide> get _filteredGuides {
-    return _allGuides.where((guide) {
-      final matchesSearch = guide.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          guide.languages.any((l) => l.toLowerCase().contains(_searchQuery.toLowerCase())) ||
-          guide.specialty.toLowerCase().contains(_searchQuery.toLowerCase());
-      
-      final matchesSpecialty = _selectedSpecialty == 'All' || guide.specialty == _selectedSpecialty;
-      
-      return matchesSearch && matchesSpecialty;
-    }).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,48 +27,85 @@ class _GuidesPageState extends State<GuidesPage> {
     final isMobile = size.width < 700;
     final isTablet = size.width >= 700 && size.width < 1100;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: const NavBar(),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                _GuidesHero(isMobile: isMobile),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 60,
-                    horizontal: isMobile ? 20 : 60,
-                  ),
-                  child: Center(
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: Column(
-                        children: [
-                          _SearchAndFilter(
-                            specialties: _specialties,
-                            selectedSpecialty: _selectedSpecialty,
-                            onSearchChanged: (val) => setState(() => _searchQuery = val),
-                            onSpecialtyChanged: (val) => setState(() => _selectedSpecialty = val),
+    return BlocBuilder<CapeToursCubit, CapeToursState>(
+      builder: (context, state) {
+        if (state is CapeToursLoading) {
+          return const Scaffold(
+            appBar: NavBar(),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        List<Guide> allGuides = [];
+        if (state is CapeToursLoaded) {
+          allGuides = state.guides;
+        }
+
+        final specialties = [
+          'All',
+          ...allGuides.map((g) => g.specialty).where((s) => s.isNotEmpty).toSet()
+        ];
+
+        final filteredGuides = allGuides.where((guide) {
+          final matchesSearch = guide.name
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()) ||
+              guide.languages.any((l) =>
+                  l.toLowerCase().contains(_searchQuery.toLowerCase())) ||
+              guide.specialty.toLowerCase().contains(_searchQuery.toLowerCase());
+
+          final matchesSpecialty =
+              _selectedSpecialty == 'All' || guide.specialty == _selectedSpecialty;
+
+          return matchesSearch && matchesSpecialty;
+        }).toList();
+
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: const NavBar(),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _GuidesHero(isMobile: isMobile),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 60,
+                        horizontal: isMobile ? 20 : 60,
+                      ),
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: Column(
+                            children: [
+                              _SearchAndFilter(
+                                specialties: specialties,
+                                selectedSpecialty: _selectedSpecialty,
+                                onSearchChanged: (val) =>
+                                    setState(() => _searchQuery = val),
+                                onSpecialtyChanged: (val) =>
+                                    setState(() => _selectedSpecialty = val),
+                              ),
+                              const SizedBox(height: 60),
+                              _GuidesGrid(
+                                guides: filteredGuides,
+                                crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 60),
-                          _GuidesGrid(
-                            guides: _filteredGuides,
-                            crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                    const Footer(),
+                  ],
                 ),
-                const Footer(),
-              ],
-            ),
+              ),
+              const WhatsAppButton(),
+            ],
           ),
-          const WhatsAppButton(),
-        ],
-      ),
+        );
+      },
     );
   }
 }

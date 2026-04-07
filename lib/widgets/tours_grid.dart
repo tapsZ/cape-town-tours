@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../data/tour_data.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../logic/cape_tours_cubit.dart';
+import '../logic/cape_tours_state.dart';
+import '../models/tour.dart';
 import '../config/app_theme.dart';
 import 'tour_card.dart';
 
@@ -43,33 +46,50 @@ class ToursGrid extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Choose from our curated selection of Cape Town\'s most breathtaking tours',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 50),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = 1;
-                  if (constraints.maxWidth > 700) crossAxisCount = 2;
-                  if (constraints.maxWidth > 1000) crossAxisCount = 3;
+              BlocBuilder<CapeToursCubit, CapeToursState>(
+                builder: (context, state) {
+                  if (state is CapeToursLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 24,
-                      mainAxisSpacing: 24,
-                      childAspectRatio: 0.72,
-                    ),
-                    itemCount: TourData.tours.length,
-                    itemBuilder: (context, index) {
-                      return TourCard(tour: TourData.tours[index]);
+                  List<Tour> tours = [];
+                  if (state is CapeToursLoaded) {
+                    tours = state.tours;
+                  }
+
+                  if (tours.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      int crossAxisCount = 1;
+                      if (constraints.maxWidth > 700) crossAxisCount = 2;
+                      if (constraints.maxWidth > 1000) crossAxisCount = 3;
+
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 24,
+                          mainAxisSpacing: 24,
+                          childAspectRatio: 0.72,
+                        ),
+                        itemCount: tours.length,
+                        itemBuilder: (context, index) {
+                          return TourCard(tour: tours[index]);
+                        },
+                      );
                     },
                   );
                 },

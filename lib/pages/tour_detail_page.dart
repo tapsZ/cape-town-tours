@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../core/constants/app_constants.dart';
+import '../logic/cape_tours_cubit.dart';
+import '../logic/cape_tours_state.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../data/tour_data.dart';
 import '../models/tour.dart';
+import '../models/booking_request.dart';
 import '../config/app_theme.dart';
 import '../core/widgets/nav_bar.dart';
 import '../core/widgets/footer.dart';
@@ -16,54 +20,79 @@ class TourDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tour = TourData.tours.firstWhere(
-      (t) => t.slug == slug,
-      orElse: () => TourData.tours.first,
-    );
+    return BlocBuilder<CapeToursCubit, CapeToursState>(
+      builder: (context, state) {
+        if (state is CapeToursLoading) {
+          return const Scaffold(
+            appBar: NavBar(),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    final size = MediaQuery.of(context).size;
-    final isMobile = size.width < 900;
+        List<Tour> tours = [];
+        if (state is CapeToursLoaded) {
+          tours = state.tours;
+        }
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: const NavBar(),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _TourHero(tour: tour),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 60,
-                    horizontal: isMobile ? 20 : 60,
-                  ),
-                  child: Center(
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _MainContent(tour: tour, isMobile: isMobile),
-                          const SizedBox(height: 80),
-                          _GallerySection(tour: tour),
-                          const SizedBox(height: 80),
-                          _TestimonialsSection(tourSlug: tour.slug),
-                          const SizedBox(height: 80),
-                          _RelatedToursSection(currentTourSlug: tour.slug),
-                        ],
+        final matchingTours = tours.where((t) => t.slug == slug).toList();
+
+        if (matchingTours.isEmpty) {
+          return const Scaffold(
+            appBar: NavBar(),
+            body: Center(child: Text('Tour not found')),
+          );
+        }
+
+        final tour = matchingTours.first;
+
+        final size = MediaQuery.of(context).size;
+        final isMobile = size.width < 900;
+
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: const NavBar(),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _TourHero(tour: tour),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 60,
+                        horizontal: isMobile ? 20 : 60,
+                      ),
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _MainContent(tour: tour, isMobile: isMobile),
+                              const SizedBox(height: 80),
+                              _GallerySection(tour: tour),
+                              const SizedBox(height: 80),
+                              _TestimonialsSection(tourSlug: tour.slug),
+                              const SizedBox(height: 80),
+                              _RelatedToursSection(
+                                currentTourSlug: tour.slug,
+                                allTours: tours,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const Footer(),
+                  ],
                 ),
-                const Footer(),
-              ],
-            ),
+              ),
+              const WhatsAppButton(),
+            ],
           ),
-          const WhatsAppButton(),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -79,12 +108,19 @@ class _TourHero extends StatelessWidget {
       children: [
         Hero(
           tag: 'tour-${tour.id}',
-          child: Image.asset(
-            tour.imagePath,
-            width: double.infinity,
-            height: size.height * 0.7,
-            fit: BoxFit.cover,
-          ),
+          child: tour.imagePath.startsWith('http')
+              ? Image.network(
+                  tour.imagePath,
+                  width: double.infinity,
+                  height: size.height * 0.7,
+                  fit: BoxFit.cover,
+                )
+              : Image.asset(
+                  tour.imagePath,
+                  width: double.infinity,
+                  height: size.height * 0.7,
+                  fit: BoxFit.cover,
+                ),
         ),
         Container(
           width: double.infinity,
@@ -222,6 +258,23 @@ class _Overview extends StatelessWidget {
                 fontSize: 18,
               ),
         ),
+        const SizedBox(height: 30),
+        Row(
+          children: [
+            Expanded(
+              child: _DetailRow(
+                icon: Icons.location_on_outlined,
+                label: 'Meeting Point:\n${tour.meetingPoint.isEmpty ? "V&A Waterfront" : tour.meetingPoint}',
+              ),
+            ),
+            Expanded(
+              child: _DetailRow(
+                icon: Icons.group_outlined,
+                label: 'Max Capacity:\n${tour.maxCapacity} persons',
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -312,8 +365,127 @@ class _BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _BookingForm(tour: tour);
+  }
+}
+
+class _BookingForm extends StatefulWidget {
+  final Tour tour;
+  const _BookingForm({required this.tour});
+
+  @override
+  State<_BookingForm> createState() => _BookingFormState();
+}
+
+class _BookingFormState extends State<_BookingForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _guestsController = TextEditingController(text: '1');
+  final _notesController = TextEditingController();
+  DateTime? _selectedDate;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _guestsController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppTheme.primaryBlue,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
+  Future<void> _submitBooking() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a date')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final request = BookingRequest(
+      tourId: widget.tour.id,
+      customerName: _nameController.text,
+      customerEmail: _emailController.text,
+      customerPhone: _phoneController.text,
+      bookingDate: _selectedDate!,
+      numberOfGuests: int.tryParse(_guestsController.text) ?? 1,
+      notes: _notesController.text,
+    );
+
+    final success = await context.read<CapeToursCubit>().createBooking(request);
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (success) {
+        _showSuccessDialog();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Booking failed. Please try again.')),
+        );
+      }
+    }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Booking Requested!'),
+        content: const Text(
+            'We have received your booking request. Our team will contact you shortly to confirm your booking and arrange payment.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _formKey.currentState?.reset();
+              setState(() {
+                _selectedDate = null;
+                _nameController.clear();
+                _emailController.clear();
+                _phoneController.clear();
+                _guestsController.text = '1';
+                _notesController.clear();
+              });
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(35),
+      padding: const EdgeInsets.all(30),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -325,55 +497,158 @@ class _BookingCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'FROM',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textLight,
-              letterSpacing: 1.5,
-            ),
-          ),
-          Text(
-            'R${tour.priceFrom.toInt()}',
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.w900,
-              color: AppTheme.primaryBlue,
-            ),
-          ),
-          const SizedBox(height: 30),
-          _DetailRow(icon: Icons.timer_outlined, label: tour.duration),
-          const SizedBox(height: 15),
-          _DetailRow(icon: Icons.people_outline, label: tour.groupSize),
-          const SizedBox(height: 15),
-          _DetailRow(icon: Icons.language_outlined, label: 'English / German'),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () => launchUrl(Uri.parse(
-                'https://wa.me/27123456789?text=Hello! I would like to book the ${tour.title} tour.')),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 65),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'BOOK THIS TOUR',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.primaryBlue,
+                letterSpacing: 1.2,
               ),
             ),
-            child: const Text(
-              'BOOK VIA WHATSAPP',
-              style: TextStyle(letterSpacing: 1.2, fontWeight: FontWeight.bold),
+            const SizedBox(height: 10),
+            Text(
+              'From R${widget.tour.priceFrom.toInt()}',
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppTheme.textLight,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          const Center(
-            child: Text(
-              'Fast & Secure Booking',
-              style: TextStyle(fontSize: 12, color: AppTheme.textLight),
+            const SizedBox(height: 30),
+            _buildTextField(
+              controller: _nameController,
+              label: 'Full Name',
+              icon: Icons.person_outline,
+              validator: (v) => v!.isEmpty ? 'Required' : null,
             ),
-          ),
-        ],
+            const SizedBox(height: 15),
+            _buildTextField(
+              controller: _emailController,
+              label: 'Email Address',
+              icon: Icons.email_outlined,
+              validator: (v) => v!.contains('@') ? null : 'Invalid email',
+            ),
+            const SizedBox(height: 15),
+            _buildTextField(
+              controller: _phoneController,
+              label: 'Phone Number',
+              icon: Icons.phone_outlined,
+            ),
+            const SizedBox(height: 15),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectDate(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_today_outlined,
+                              size: 18, color: Colors.grey[600]),
+                          const SizedBox(width: 10),
+                          Text(
+                            _selectedDate == null
+                                ? 'Date'
+                                : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                            style: TextStyle(
+                              color: _selectedDate == null
+                                  ? Colors.grey[600]
+                                  : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildTextField(
+                    controller: _guestsController,
+                    label: 'Guests',
+                    icon: Icons.people_outline,
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            _buildTextField(
+              controller: _notesController,
+              label: 'Notes (optional)',
+              icon: Icons.notes,
+              maxLines: 2,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _submitBooking,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 60),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'BOOK NOW',
+                      style: TextStyle(
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: TextButton(
+                onPressed: () => launchUrl(Uri.parse(
+                    'https://wa.me/27123456789?text=Hello! I would like to book the ${widget.tour.title} tour.')),
+                child: const Text('OR BOOK VIA WHATSAPP'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
       ),
     );
   }
@@ -428,11 +703,17 @@ class _GallerySection extends StatelessWidget {
           items: tour.galleryImages.map((img) {
             return ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                img,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: img.startsWith('http')
+                  ? Image.network(
+                      img,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      img,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
             );
           }).toList(),
         ),
@@ -448,7 +729,7 @@ class _TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final testimonials =
-        TourData.testimonials.where((t) => t.tourSlug == tourSlug).toList();
+        AppConstants.testimonials.where((t) => t.tourSlug == tourSlug).toList();
 
     if (testimonials.isEmpty) return const SizedBox.shrink();
 
@@ -504,11 +785,15 @@ class _TestimonialsSection extends StatelessWidget {
 
 class _RelatedToursSection extends StatelessWidget {
   final String currentTourSlug;
-  const _RelatedToursSection({required this.currentTourSlug});
+  final List<Tour> allTours;
+  const _RelatedToursSection({
+    required this.currentTourSlug,
+    required this.allTours,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final relatedTours = TourData.tours
+    final relatedTours = allTours
         .where((t) => t.slug != currentTourSlug)
         .take(3)
         .toList();
