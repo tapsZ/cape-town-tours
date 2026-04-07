@@ -3,7 +3,7 @@
 
 /*
   # Modern WebAssembly-Compatible Content Security Policy
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.r2.dev https://images.unsplash.com; connect-src 'self' blob: https://server.essenceofsale.com https://www.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com https://images.unsplash.com; object-src 'self'; worker-src 'self' blob:; frame-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.r2.dev https://images.unsplash.com; connect-src 'self' blob: https://server.essenceofsale.com https://www.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com https://images.unsplash.com https://*.r2.dev; object-src 'self'; worker-src 'self' blob:; frame-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
   
   # Security Headers
   X-Frame-Options: DENY
