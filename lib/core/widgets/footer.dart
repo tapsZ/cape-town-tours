@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../config/app_theme.dart';
 
 class Footer extends StatelessWidget {
@@ -20,9 +21,7 @@ class Footer extends StatelessWidget {
           child: Column(
             children: [
               if (isMobile)
-                Column(
-                  children: _buildFooterSections(context),
-                )
+                Column(children: _buildFooterSections(context))
               else
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,10 +124,7 @@ class _FooterLinkButton extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 15),
       child: InkWell(
         onTap: onPressed,
-        child: Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
-        ),
+        child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
       ),
     );
   }
@@ -183,18 +179,12 @@ class _ContactRow extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: isLink ? () {} : null,
-              child: Text(
-                label,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
-              ),
+              child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
             ),
           ),
         ],
       ),
     );
-  }
-}
-
   }
 }
 
@@ -230,11 +220,7 @@ class _FooterLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white38, fontSize: 12),
-      ),
+      child: Text(label, style: const TextStyle(color: Colors.white38, fontSize: 12)),
     );
   }
 }
-
