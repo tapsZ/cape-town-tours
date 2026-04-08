@@ -122,7 +122,7 @@ class _GuidesHero extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppTheme.primaryBlue,
         image: DecorationImage(
-          image: AssetImage('assets/images/portfolio/Bo-Kaap.jpg'),
+          image: AssetImage('assets/images/portfolio/bo-kaap.webp'),
           fit: BoxFit.cover,
           opacity: 0.2,
         ),

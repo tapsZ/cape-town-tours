@@ -2,9 +2,9 @@ import '../../models/tour.dart';
 
 class AppConstants {
   static const List<String> heroImages = [
-    'assets/images/Slide/Slide1.png',
-    'assets/images/Slide/Slide2.png',
-    'assets/images/Slide/Slide3.png',
+    'assets/images/Slide/slide-1.webp',
+    'assets/images/Slide/slide-2.webp',
+    'assets/images/Slide/slide-3.webp',
   ];
 
   static const List<Testimonial> testimonials = [

@@ -32,7 +32,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'assets/images/logo.png',
+                'assets/images/logo.webp',
                 height: 40,
                 fit: BoxFit.contain,
               ),

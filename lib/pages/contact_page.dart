@@ -58,7 +58,7 @@ class _ContactHero extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppTheme.primaryBlue,
         image: DecorationImage(
-          image: AssetImage('assets/images/portfolio/Cape-Town-City.jpg'),
+          image: AssetImage('assets/images/portfolio/cape-town-city.webp'),
           fit: BoxFit.cover,
           opacity: 0.2,
         ),

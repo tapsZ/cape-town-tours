@@ -72,7 +72,7 @@ class Footer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.asset(
-              'assets/images/logo.png',
+              'assets/images/logo.webp',
               height: 60,
               fit: BoxFit.contain,
               color: Colors.white, // Invert for dark footer

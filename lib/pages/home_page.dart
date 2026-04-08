@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'assets/images/logo.png',
+                      'assets/images/logo.webp',
                       height: 50,
                       color: Colors.white,
                     ),
