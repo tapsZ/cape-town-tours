@@ -1,11 +1,22 @@
 import 'package:equatable/equatable.dart';
 
+class TourImage extends Equatable {
+  final String url;
+  final String? storageKey;
+
+  const TourImage({required this.url, this.storageKey});
+
+  @override
+  List<Object?> get props => [url, storageKey];
+}
+
 class Tour extends Equatable {
   final String id;
   final String title;
   final String description;
   final String imagePath;
-  final List<String> galleryImages;
+  final String? imageStorageKey;
+  final List<TourImage> galleryImages;
   final List<String> highlights;
   final List<String> included;
   final List<String> whatToBring;
@@ -28,6 +39,7 @@ class Tour extends Equatable {
     required this.highlights,
     required this.slug,
     required this.priceFrom,
+    this.imageStorageKey,
     this.galleryImages = const [],
     this.included = const [],
     this.whatToBring = const [],
@@ -42,9 +54,14 @@ class Tour extends Equatable {
   });
 
   factory Tour.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> images = json['images'] ?? [];
-    final String mainImage = images.isNotEmpty ? images.first['url'] : '';
-    final List<String> gallery = images.map((e) => e['url'] as String).toList();
+    final List<dynamic> imagesJson = json['images'] ?? [];
+    final List<TourImage> images = imagesJson.map((img) => TourImage(
+      url: img['url'] ?? '',
+      storageKey: img['storageKey'],
+    )).toList();
+
+    final String mainImage = images.isNotEmpty ? images.first.url : '';
+    final String? mainImageKey = images.isNotEmpty ? images.first.storageKey : null;
 
     List<String> parseCommaList(String? value) {
       if (value == null || value.isEmpty) return [];
@@ -56,7 +73,8 @@ class Tour extends Equatable {
       title: json['name'] ?? '',
       description: json['description'] ?? '',
       imagePath: mainImage,
-      galleryImages: gallery,
+      imageStorageKey: mainImageKey,
+      galleryImages: images,
       highlights: parseCommaList(json['highlights']),
       slug: json['slug'] ?? '',
       priceFrom: (json['price'] as num?)?.toDouble() ?? 0.0,
@@ -74,7 +92,7 @@ class Tour extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, title, slug];
+  List<Object?> get props => [id, title, slug, imageStorageKey];
 }
 
 class Testimonial extends Equatable {

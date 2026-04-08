@@ -9,6 +9,7 @@ class Guide extends Equatable {
   final List<String> languages;
   final String specialty;
   final bool isFeatured;
+  final String? imageStorageKey;
 
   const Guide({
     required this.id,
@@ -19,6 +20,7 @@ class Guide extends Equatable {
     this.languages = const ['English'],
     this.specialty = '',
     this.isFeatured = false,
+    this.imageStorageKey,
   });
 
   factory Guide.fromJson(Map<String, dynamic> json) {
@@ -36,9 +38,10 @@ class Guide extends Equatable {
       languages: parseCommaList(json['languages']),
       specialty: json['specialties'] ?? '',
       isFeatured: json['isFeatured'] ?? false,
+      imageStorageKey: json['photoStorageKey'],
     );
   }
 
   @override
-  List<Object?> get props => [id, name];
+  List<Object?> get props => [id, name, imageStorageKey];
 }

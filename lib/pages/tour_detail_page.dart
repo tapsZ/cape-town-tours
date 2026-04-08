@@ -13,6 +13,7 @@ import '../core/widgets/nav_bar.dart';
 import '../core/widgets/footer.dart';
 import '../widgets/tour_card.dart';
 import '../widgets/whatsapp_button.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class TourDetailPage extends StatelessWidget {
   final String slug;
@@ -109,11 +110,18 @@ class _TourHero extends StatelessWidget {
         Hero(
           tag: 'tour-${tour.id}',
           child: tour.imagePath.startsWith('http')
-              ? Image.network(
-                  tour.imagePath,
+              ? CachedNetworkImage(
+                  imageUrl: tour.imagePath,
+                  cacheKey: tour.imageStorageKey,
                   width: double.infinity,
                   height: size.height * 0.7,
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.black26,
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) =>
+                      const Center(child: Icon(Icons.error, color: Colors.white)),
                 )
               : Image.asset(
                   tour.imagePath,
@@ -703,14 +711,21 @@ class _GallerySection extends StatelessWidget {
           items: tour.galleryImages.map((img) {
             return ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: img.startsWith('http')
-                  ? Image.network(
-                      img,
+              child: img.url.startsWith('http')
+                  ? CachedNetworkImage(
+                      imageUrl: img.url,
+                      cacheKey: img.storageKey,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Center(child: Icon(Icons.error)),
                     )
                   : Image.asset(
-                      img,
+                      img.url,
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
