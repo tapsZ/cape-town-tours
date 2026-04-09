@@ -108,8 +108,18 @@ class _TourHero extends StatelessWidget {
       children: [
         Hero(
           tag: 'tour-${tour.id}',
-          child: tour.imagePath.startsWith('http')
-              ? Image.network(
+          child: tour.imagePath.isEmpty
+              ? Container(
+                  width: double.infinity,
+                  height: size.height * 0.7,
+                  color: Colors.grey[900],
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported_outlined,
+                        color: Colors.white24, size: 80),
+                  ),
+                )
+              : tour.imagePath.startsWith('http')
+                  ? Image.network(
                   tour.imagePath,
                   width: double.infinity,
                   height: size.height * 0.7,
@@ -117,19 +127,19 @@ class _TourHero extends StatelessWidget {
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
-                      color: Colors.black26,
+                      color: Colors.grey[200],
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   },
                   errorBuilder: (context, error, stackTrace) =>
-                      const Center(child: Icon(Icons.error, color: Colors.white)),
+                      const Center(child: Icon(Icons.error)),
                 )
-              : Image.asset(
-                  tour.imagePath,
-                  width: double.infinity,
-                  height: size.height * 0.7,
-                  fit: BoxFit.cover,
-                ),
+                  : Image.asset(
+                      tour.imagePath,
+                      width: double.infinity,
+                      height: size.height * 0.7,
+                      fit: BoxFit.cover,
+                    ),
         ),
         Container(
           width: double.infinity,
@@ -709,7 +719,9 @@ class _GallerySection extends StatelessWidget {
             enlargeCenterPage: true,
             autoPlay: true,
           ),
-          items: tour.galleryImages.map((img) {
+          items: tour.galleryImages
+              .where((img) => img.url.isNotEmpty)
+              .map((img) {
             return ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: img.url.startsWith('http')

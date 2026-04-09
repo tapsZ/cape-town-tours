@@ -60,8 +60,12 @@ class Tour extends Equatable {
       storageKey: img['storageKey'],
     )).toList();
 
-    final String mainImage = images.isNotEmpty ? images.first.url : '';
-    final String? mainImageKey = images.isNotEmpty ? images.first.storageKey : null;
+    final String mainImage = images.any((img) => img.url.isNotEmpty)
+        ? images.firstWhere((img) => img.url.isNotEmpty).url
+        : '';
+    final String? mainImageKey = images.any((img) => img.url.isNotEmpty)
+        ? images.firstWhere((img) => img.url.isNotEmpty).storageKey
+        : null;
 
     List<String> parseCommaList(String? value) {
       if (value == null || value.isEmpty) return [];

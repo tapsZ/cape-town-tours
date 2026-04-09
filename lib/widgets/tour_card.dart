@@ -47,24 +47,39 @@ class _TourCardState extends State<TourCard> {
                   children: [
                     AspectRatio(
                       aspectRatio: 4 / 3,
-                      child: widget.tour.imagePath.startsWith('http')
-                          ? Image.network(
-                              widget.tour.imagePath,
-                              fit: BoxFit.cover,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  color: Colors.grey[200],
-                                  child: const Center(child: CircularProgressIndicator()),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Center(child: Icon(Icons.error)),
+                      child: widget.tour.imagePath.isEmpty
+                          ? Container(
+                              color: Colors.grey[200],
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.image_outlined, color: Colors.grey[400], size: 40),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'No Image Available',
+                                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                                  ),
+                                ],
+                              ),
                             )
-                          : Image.asset(
-                              widget.tour.imagePath,
-                              fit: BoxFit.cover,
-                            ),
+                          : widget.tour.imagePath.startsWith('http')
+                              ? Image.network(
+                                  widget.tour.imagePath,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: Colors.grey[200],
+                                      child: const Center(child: CircularProgressIndicator()),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Center(child: Icon(Icons.error)),
+                                )
+                              : Image.asset(
+                                  widget.tour.imagePath,
+                                  fit: BoxFit.cover,
+                                ),
                     ),
                     if (widget.tour.isMostPopular)
                       Positioned(

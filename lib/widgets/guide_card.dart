@@ -42,14 +42,32 @@ class _GuideCardState extends State<GuideCard> {
             Stack(
               alignment: Alignment.center,
               children: [
-                CircleAvatar(
-                  radius: 80,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: widget.guide.imagePath.startsWith('http')
-                      ? NetworkImage(
-                          widget.guide.imagePath,
-                        )
-                      : AssetImage(widget.guide.imagePath) as ImageProvider,
+                Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: widget.guide.imagePath.isEmpty
+                        ? const Icon(Icons.person, size: 80, color: Colors.grey)
+                        : widget.guide.imagePath.startsWith('http')
+                            ? Image.network(
+                                widget.guide.imagePath,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(child: CircularProgressIndicator());
+                                },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Center(child: Icon(Icons.error)),
+                              )
+                            : Image.asset(
+                                widget.guide.imagePath,
+                                fit: BoxFit.cover,
+                              ),
+                  ),
                 ),
                 Positioned(
                   bottom: 0,
