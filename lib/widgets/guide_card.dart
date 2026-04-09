@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/guide.dart';
 import '../config/app_theme.dart';
 
@@ -47,9 +46,8 @@ class _GuideCardState extends State<GuideCard> {
                   radius: 80,
                   backgroundColor: Colors.grey[200],
                   backgroundImage: widget.guide.imagePath.startsWith('http')
-                      ? CachedNetworkImageProvider(
+                      ? NetworkImage(
                           widget.guide.imagePath,
-                          cacheKey: widget.guide.imageStorageKey,
                         )
                       : AssetImage(widget.guide.imagePath) as ImageProvider,
                 ),

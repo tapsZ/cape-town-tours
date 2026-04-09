@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/tour.dart';
 import '../config/app_theme.dart';
 
@@ -49,15 +48,17 @@ class _TourCardState extends State<TourCard> {
                     AspectRatio(
                       aspectRatio: 4 / 3,
                       child: widget.tour.imagePath.startsWith('http')
-                          ? CachedNetworkImage(
-                              imageUrl: widget.tour.imagePath,
-                              cacheKey: widget.tour.imageStorageKey,
+                          ? Image.network(
+                              widget.tour.imagePath,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: Colors.grey[200],
-                                child: const Center(child: CircularProgressIndicator()),
-                              ),
-                              errorWidget: (context, url, error) =>
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(child: CircularProgressIndicator()),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) =>
                                   const Center(child: Icon(Icons.error)),
                             )
                           : Image.asset(
