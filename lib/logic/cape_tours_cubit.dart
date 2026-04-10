@@ -13,10 +13,14 @@ class CapeToursCubit extends Cubit<CapeToursState> {
     try {
       final tours = await _apiService.getTours();
       final guides = await _apiService.getGuides();
+      final heroImages = await _apiService.getSectionImages('HERO_CAROUSEL');
+      final ctaImages = await _apiService.getSectionImages('CTA_BACKGROUND');
 
       emit(CapeToursLoaded(
         tours: tours,
         guides: guides,
+        heroImages: heroImages,
+        ctaSectionImage: ctaImages.isNotEmpty ? ctaImages.first : null,
       ));
     } catch (e) {
       emit(CapeToursError(e.toString()));

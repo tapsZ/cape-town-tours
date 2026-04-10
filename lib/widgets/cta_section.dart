@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../config/app_theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../logic/cape_tours_state.dart';
+import '../logic/cape_tours_cubit.dart';
 
 class CTASection extends StatelessWidget {
   const CTASection({super.key});
@@ -11,16 +14,23 @@ class CTASection extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 800;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.primaryBlue,
-        image: const DecorationImage(
-          image: AssetImage('assets/images/portfolio/cape-town-city.webp'),
-          fit: BoxFit.cover,
-          opacity: 0.15,
-        ),
-      ),
+    return BlocBuilder<CapeToursCubit, CapeToursState>(
+      builder: (context, state) {
+        ImageProvider backgroundImage = const AssetImage('assets/images/portfolio/cape-town-city.webp');
+        if (state is CapeToursLoaded && state.ctaSectionImage != null) {
+          backgroundImage = NetworkImage(state.ctaSectionImage!.url);
+        }
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue,
+            image: DecorationImage(
+              image: backgroundImage,
+              fit: BoxFit.cover,
+              opacity: 0.15,
+            ),
+          ),
       padding: EdgeInsets.symmetric(
         vertical: isMobile ? 80 : 120,
         horizontal: 20,
@@ -75,6 +85,8 @@ class CTASection extends StatelessWidget {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }
