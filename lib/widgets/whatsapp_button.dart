@@ -6,7 +6,7 @@ class WhatsAppButton extends StatelessWidget {
   const WhatsAppButton({super.key});
 
   Future<void> _launchWhatsApp() async {
-    final Uri url = Uri.parse('https://wa.me/27123456789?text=Hello! I am interested in booking a tour with Cape Best Tours.');
+    final Uri url = Uri.parse('https://wa.me/27123456789?text=Hello! I really like the idea of Cape Best Tours! Please let me know when you launch.');
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }

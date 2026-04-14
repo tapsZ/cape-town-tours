@@ -41,7 +41,7 @@ class CTASection extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'READY TO EXPLORE CAPE TOWN?',
+                'WE ARE PREPARING TO LAUNCH',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.displayLarge?.copyWith(
                       color: Colors.white,
@@ -52,7 +52,7 @@ class CTASection extends StatelessWidget {
               ).animate().fadeIn().scale(delay: 200.ms),
               const SizedBox(height: 24),
               Text(
-                'Join our expert bucket-list tours and experience the Mother City like a local. Professional guides, private transport, and memories that last a lifetime.',
+                'We\'re putting the finishing touches on our premium Cape Town experiences. Join our exclusive waitlist and be the first to know when we go live.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.8),
@@ -68,15 +68,23 @@ class CTASection extends StatelessWidget {
                 alignment: WrapAlignment.center,
                 children: [
                   _CTAButton(
-                    text: 'BOOK VIA WHATSAPP',
-                    icon: Icons.chat_bubble,
-                    onPressed: () => launchUrl(Uri.parse('https://wa.me/27123456789?text=Hello! I\'m ready to book a tour.')),
+                    text: 'LIKE THE IDEA',
+                    icon: Icons.favorite,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Thank you! We\'re glad you\'re excited about Cape Best Tours!'),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: AppTheme.accentOrange,
+                        ),
+                      );
+                    },
                     isPrimary: true,
                   ),
                   _CTAButton(
-                    text: 'CALL US NOW',
-                    icon: Icons.phone_in_talk,
-                    onPressed: () => launchUrl(Uri.parse('tel:+27123456789')),
+                    text: 'GET NOTIFIED',
+                    icon: Icons.notifications_active_outlined,
+                    onPressed: () => launchUrl(Uri.parse('https://wa.me/27123456789?text=Hello! I\'d like to be notified when Cape Best Tours launches.')),
                     isPrimary: false,
                   ),
                 ],

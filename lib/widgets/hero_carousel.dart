@@ -49,6 +49,23 @@ class HeroCarousel extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.accentOrange.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: const Text(
+                        'LAUNCHING SOON',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ).animate().fadeIn(delay: 200.ms).slideY(begin: -0.2, end: 0),
+                    const SizedBox(height: 24),
                     Text(
                       'WELCOME TO CAPE TOWN',
                       textAlign: TextAlign.center,

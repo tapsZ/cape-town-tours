@@ -139,12 +139,23 @@ class _HomePageState extends State<HomePage> {
             const Spacer(),
             Padding(
               padding: const EdgeInsets.all(20),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppTheme.primaryBlue),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text('BOOK NOW'),
+                child: const Center(
+                  child: Text(
+                    'LAUNCHING SOON',
+                    style: TextStyle(
+                      color: AppTheme.primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

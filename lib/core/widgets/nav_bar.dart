@@ -99,17 +99,21 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
               const SizedBox(width: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                child: ElevatedButton(
-                  onPressed: () => context.go('/contact'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryBlue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppTheme.primaryBlue),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'LAUNCHING SOON',
+                    style: TextStyle(
+                      color: AppTheme.primaryBlue,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
                     ),
                   ),
-                  child: const Text('BOOK NOW'),
                 ),
               ),
               const SizedBox(width: 20),

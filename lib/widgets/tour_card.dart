@@ -15,6 +15,23 @@ class TourCard extends StatefulWidget {
 
 class _TourCardState extends State<TourCard> {
   bool _isHovered = false;
+  bool _isLiked = false;
+
+  void _handleLike() {
+    setState(() {
+      _isLiked = !_isLiked;
+    });
+    if (_isLiked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Glad you like the "${widget.tour.title}" idea! We are launching soon!'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppTheme.primaryBlue,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +120,31 @@ class _TourCardState extends State<TourCard> {
                         ),
                       ),
                     Positioned(
+                      top: 15,
+                      right: 15,
+                      child: GestureDetector(
+                        onTap: _handleLike,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _isLiked ? Icons.favorite : Icons.favorite_border,
+                            color: _isLiked ? Colors.red : AppTheme.textLight,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
@@ -118,13 +160,33 @@ class _TourCardState extends State<TourCard> {
                             ],
                           ),
                         ),
-                        child: Text(
-                          widget.tour.category,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              widget.tour.category,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentOrange.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: const Text(
+                                'COMING SOON',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -200,16 +262,32 @@ class _TourCardState extends State<TourCard> {
                               ),
                             ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: AppTheme.primaryBlue,
+                          GestureDetector(
+                            onTap: _handleLike,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Text(
+                                    'INTERESTED',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryBlue,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons.thumb_up_alt_outlined,
+                                    size: 16,
+                                    color: AppTheme.primaryBlue,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
