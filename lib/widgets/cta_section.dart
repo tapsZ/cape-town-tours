@@ -54,17 +54,30 @@ class _CTASectionState extends State<CTASection> {
   }
 
   Future<void> _handleLike(Map<String, String> settings) async {
-    if (_hasLiked || _isLiking) return;
+    debugPrint('LIKE: click hasLiked=$_hasLiked isLiking=$_isLiking '
+        'turnstileEnabled=${settings['TURNSTILE_ENABLED']} '
+        'turnstileReady=${_turnstile != null}');
+    if (_hasLiked || _isLiking) {
+      debugPrint('LIKE: skipped (already liked or in-flight)');
+      if (mounted && _hasLiked) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You already liked this. Thank you!')),
+        );
+      }
+      return;
+    }
 
     setState(() => _isLiking = true);
 
     try {
       final cubit = context.read<CapeToursCubit>();
-      
+
       // Request new token if enabled
       if (settings['TURNSTILE_ENABLED'] == 'true') {
         _ensureTurnstile(settings);
         _turnstileToken = await _turnstile?.getToken();
+        debugPrint('LIKE: turnstile token='
+            '${_turnstileToken == null ? 'null' : '${_turnstileToken!.substring(0, _turnstileToken!.length < 12 ? _turnstileToken!.length : 12)}...(len=${_turnstileToken!.length})'}');
         if (_turnstileToken == null) {
           setState(() => _isLiking = false);
           debugPrint('LIKE: Turnstile verification check failed (no token produced)');
@@ -77,7 +90,9 @@ class _CTASectionState extends State<CTASection> {
         }
       }
 
+      debugPrint('LIKE: POST /likes (token=${_turnstileToken != null})');
       final result = await cubit.recordGeneralLike(_turnstileToken);
+      debugPrint('LIKE: result=$result');
 
       if (result['success'] == true) {
         final prefs = await SharedPreferences.getInstance();
@@ -98,17 +113,18 @@ class _CTASectionState extends State<CTASection> {
       } else {
         setState(() => _isLiking = false);
         if (mounted) {
+          final msg = result['message']?.toString() ?? 'Failed to record like. Please try again.';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to record like. Please try again.')),
+            SnackBar(content: Text(msg)),
           );
         }
       }
-    } catch (e) {
-      debugPrint('LIKE error: $e');
+    } catch (e, st) {
+      debugPrint('LIKE error: $e\n$st');
       setState(() => _isLiking = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Couldn\'t reach server. Please try again.')),
+          SnackBar(content: Text('Couldn\'t reach server: $e')),
         );
       }
     }
