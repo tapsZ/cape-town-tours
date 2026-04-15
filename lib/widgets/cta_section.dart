@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cloudflare_turnstile/flutter_cloudflare_turnstile.dart';
+import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 import '../config/app_theme.dart';
 import '../logic/cape_tours_state.dart';
 import '../logic/cape_tours_cubit.dart';
@@ -19,7 +19,7 @@ class _CTASectionState extends State<CTASection> {
   bool _hasLiked = false;
   bool _hasNotified = false;
   bool _isLiking = false;
-  final _turnstileKey = GlobalKey<FlutterCloudflareTurnstileState>();
+  final _turnstileController = TurnstileController();
   String? _turnstileToken;
 
   @override
@@ -46,9 +46,15 @@ class _CTASectionState extends State<CTASection> {
       
       // Request new token if enabled
       if (settings['TURNSTILE_ENABLED'] == 'true') {
-        _turnstileToken = await _turnstileKey.currentState?.getResponse();
+        _turnstileToken = await _turnstileController.refreshToken().then((_) => _turnstileController.token);
         if (_turnstileToken == null) {
           setState(() => _isLiking = false);
+          debugPrint('LIKE: Turnstile verification check failed (no token produced)');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Verification check failed, please refresh and try again.')),
+            );
+          }
           return;
         }
       }
@@ -80,11 +86,17 @@ class _CTASectionState extends State<CTASection> {
         }
       }
     } catch (e) {
+      debugPrint('LIKE error: $e');
       setState(() => _isLiking = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Couldn\'t reach server. Please try again.')),
+        );
+      }
     }
   }
 
-  void _handleNotify(BuildContext context) {
+  void _handleNotify(BuildContext context, Map<String, String> settings) {
     if (_hasNotified) return;
 
     showDialog(
@@ -182,7 +194,7 @@ class _CTASectionState extends State<CTASection> {
                       _CTAButton(
                         text: _hasNotified ? 'NOTIFIED ✓' : 'GET NOTIFIED',
                         icon: Icons.notifications_active_outlined,
-                        onPressed: _hasNotified ? () {} : () => _handleNotify(context),
+                        onPressed: _hasNotified ? () {} : () => _handleNotify(context, settings),
                         isPrimary: false,
                         isDisabled: _hasNotified,
                       ),
@@ -193,10 +205,10 @@ class _CTASectionState extends State<CTASection> {
                       opacity: 0,
                       child: SizedBox(
                         height: 0,
-                        child: FlutterCloudflareTurnstile(
-                          key: _turnstileKey,
+                        child: CloudflareTurnstile(
+                          controller: _turnstileController,
                           siteKey: settings['TURNSTILE_SITE_KEY'] ?? '',
-                          onTokenRecived: (token) => _turnstileToken = token,
+                          onTokenReceived: (token) => _turnstileToken = token,
                         ),
                       ),
                     ),

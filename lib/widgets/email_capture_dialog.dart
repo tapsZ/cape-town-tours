@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:cloudflare_turnstile/cloudflare_turnstile.dart';
 
 class EmailCaptureDialog extends StatefulWidget {
   final String tourTitle;
@@ -20,7 +21,7 @@ class EmailCaptureDialog extends StatefulWidget {
 class _EmailCaptureDialogState extends State<EmailCaptureDialog> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _turnstileKey = GlobalKey<FlutterCloudflareTurnstileState>();
+  final _turnstileController = TurnstileController();
   bool _isSubmitting = false;
   String? _turnstileToken;
 
@@ -109,7 +110,7 @@ class _EmailCaptureDialogState extends State<EmailCaptureDialog> {
                       setState(() => _isSubmitting = true);
                       
                       if (widget.settings['TURNSTILE_ENABLED'] == 'true') {
-                        _turnstileToken = await _turnstileKey.currentState?.getResponse();
+                        _turnstileToken = await _turnstileController.refreshToken().then((_) => _turnstileController.token);
                         if (_turnstileToken == null) {
                           setState(() => _isSubmitting = false);
                           return;
@@ -159,10 +160,10 @@ class _EmailCaptureDialogState extends State<EmailCaptureDialog> {
                   opacity: 0,
                   child: SizedBox(
                     height: 0,
-                    child: FlutterCloudflareTurnstile(
-                      key: _turnstileKey,
+                    child: CloudflareTurnstile(
+                      controller: _turnstileController,
                       siteKey: widget.settings['TURNSTILE_SITE_KEY'] ?? '',
-                      onTokenRecived: (token) => _turnstileToken = token,
+                      onTokenReceived: (token) => _turnstileToken = token,
                     ),
                   ),
                 ),
