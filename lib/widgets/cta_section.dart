@@ -19,13 +19,30 @@ class _CTASectionState extends State<CTASection> {
   bool _hasLiked = false;
   bool _hasNotified = false;
   bool _isLiking = false;
-  final _turnstileController = TurnstileController();
+  CloudflareTurnstile? _turnstile;
   String? _turnstileToken;
 
   @override
   void initState() {
     super.initState();
     _loadDedupeState();
+  }
+
+  @override
+  void dispose() {
+    _turnstile?.dispose();
+    super.dispose();
+  }
+
+  void _ensureTurnstile(Map<String, String> settings) {
+    if (_turnstile != null) return;
+    if (settings['TURNSTILE_ENABLED'] != 'true') return;
+    final siteKey = settings['TURNSTILE_SITE_KEY'];
+    if (siteKey == null || siteKey.isEmpty) return;
+    _turnstile = CloudflareTurnstile.invisible(
+      siteKey: siteKey,
+      onTokenReceived: (token) => _turnstileToken = token,
+    );
   }
 
   Future<void> _loadDedupeState() async {
@@ -46,7 +63,8 @@ class _CTASectionState extends State<CTASection> {
       
       // Request new token if enabled
       if (settings['TURNSTILE_ENABLED'] == 'true') {
-        _turnstileToken = await _turnstileController.refreshToken().then((_) => _turnstileController.token);
+        _ensureTurnstile(settings);
+        _turnstileToken = await _turnstile?.getToken();
         if (_turnstileToken == null) {
           setState(() => _isLiking = false);
           debugPrint('LIKE: Turnstile verification check failed (no token produced)');
@@ -135,6 +153,7 @@ class _CTASectionState extends State<CTASection> {
           if (state.ctaSectionImage != null) {
             backgroundImage = NetworkImage(state.ctaSectionImage!.url);
           }
+          _ensureTurnstile(settings);
         }
 
         return Container(
@@ -200,18 +219,6 @@ class _CTASectionState extends State<CTASection> {
                       ),
                     ],
                   ).animate(delay: 600.ms).fadeIn().slideY(begin: 0.2, end: 0),
-                  if (settings['TURNSTILE_ENABLED'] == 'true')
-                    Opacity(
-                      opacity: 0,
-                      child: SizedBox(
-                        height: 0,
-                        child: CloudflareTurnstile(
-                          controller: _turnstileController,
-                          siteKey: settings['TURNSTILE_SITE_KEY'] ?? '',
-                          onTokenReceived: (token) => _turnstileToken = token,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),

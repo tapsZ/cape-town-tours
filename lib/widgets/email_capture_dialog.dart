@@ -21,13 +21,28 @@ class EmailCaptureDialog extends StatefulWidget {
 class _EmailCaptureDialogState extends State<EmailCaptureDialog> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _turnstileController = TurnstileController();
+  CloudflareTurnstile? _turnstile;
   bool _isSubmitting = false;
   String? _turnstileToken;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.settings['TURNSTILE_ENABLED'] == 'true') {
+      final siteKey = widget.settings['TURNSTILE_SITE_KEY'];
+      if (siteKey != null && siteKey.isNotEmpty) {
+        _turnstile = CloudflareTurnstile.invisible(
+          siteKey: siteKey,
+          onTokenReceived: (token) => _turnstileToken = token,
+        );
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
+    _turnstile?.dispose();
     super.dispose();
   }
 
@@ -110,9 +125,15 @@ class _EmailCaptureDialogState extends State<EmailCaptureDialog> {
                       setState(() => _isSubmitting = true);
                       
                       if (widget.settings['TURNSTILE_ENABLED'] == 'true') {
-                        _turnstileToken = await _turnstileController.refreshToken().then((_) => _turnstileController.token);
+                        _turnstileToken = await _turnstile?.getToken();
                         if (_turnstileToken == null) {
                           setState(() => _isSubmitting = false);
+                          debugPrint('NOTIFY: Turnstile verification check failed (no token produced)');
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Verification check failed, please refresh and try again.')),
+                            );
+                          }
                           return;
                         }
                       }
@@ -155,18 +176,6 @@ class _EmailCaptureDialogState extends State<EmailCaptureDialog> {
                 onPressed: () => Navigator.pop(context),
                 child: Text('Maybe later', style: TextStyle(color: Colors.grey[500])),
               ),
-              if (widget.settings['TURNSTILE_ENABLED'] == 'true')
-                Opacity(
-                  opacity: 0,
-                  child: SizedBox(
-                    height: 0,
-                    child: CloudflareTurnstile(
-                      controller: _turnstileController,
-                      siteKey: widget.settings['TURNSTILE_SITE_KEY'] ?? '',
-                      onTokenReceived: (token) => _turnstileToken = token,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
