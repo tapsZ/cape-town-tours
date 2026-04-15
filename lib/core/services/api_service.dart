@@ -81,4 +81,67 @@ class ApiService {
       return [];
     }
   }
+
+  Future<Map<String, String>> getSettings() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/settings'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return data.map((key, value) => MapEntry(key, value.toString()));
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<bool> recordInterest(String tourId, {String? email}) async {
+    try {
+      final queryParams = email != null ? '?email=${Uri.encodeComponent(email)}' : '';
+      final response = await http.post(
+        Uri.parse('$baseUrl/tours/$tourId/interest$queryParams'),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> recordGeneralLike(String? turnstileToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/likes'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'turnstileToken': turnstileToken}),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return {'success': false};
+    } catch (e) {
+      return {'success': false};
+    }
+  }
+
+  Future<Map<String, dynamic>> subscribeWaitlist(String email, {String? source, String? turnstileToken}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/waitlist'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'source': source ?? 'HOMEPAGE_CTA',
+          'turnstileToken': turnstileToken,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else if (response.statusCode == 429) {
+        return {'success': false, 'message': 'Too many attempts. Please try again later.'};
+      }
+      return {'success': false};
+    } catch (e) {
+      return {'success': false};
+    }
+  }
 }

@@ -30,6 +30,7 @@ class Tour extends Equatable {
   final String category;
   final String meetingPoint;
   final int maxCapacity;
+  final bool acceptingBookings;
 
   const Tour({
     required this.id,
@@ -51,6 +52,7 @@ class Tour extends Equatable {
     this.category = 'Adventure',
     this.meetingPoint = '',
     this.maxCapacity = 10,
+    this.acceptingBookings = false,
   });
 
   factory Tour.fromJson(Map<String, dynamic> json) {
@@ -92,6 +94,7 @@ class Tour extends Equatable {
       category: json['category'] ?? 'Adventure',
       meetingPoint: json['meetingPoint'] ?? '',
       maxCapacity: json['maxCapacity'] ?? 10,
+      acceptingBookings: json['acceptingBookings'] ?? false,
     );
   }
 

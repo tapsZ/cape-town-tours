@@ -1,13 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../config/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cloudflare_turnstile/flutter_cloudflare_turnstile.dart';
+import '../config/app_theme.dart';
 import '../logic/cape_tours_state.dart';
 import '../logic/cape_tours_cubit.dart';
+import 'email_capture_dialog.dart';
 
-class CTASection extends StatelessWidget {
+class CTASection extends StatefulWidget {
   const CTASection({super.key});
+
+  @override
+  State<CTASection> createState() => _CTASectionState();
+}
+
+class _CTASectionState extends State<CTASection> {
+  bool _hasLiked = false;
+  bool _hasNotified = false;
+  bool _isLiking = false;
+  final _turnstileKey = GlobalKey<FlutterCloudflareTurnstileState>();
+  String? _turnstileToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDedupeState();
+  }
+
+  Future<void> _loadDedupeState() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _hasLiked = prefs.getBool('cbt_liked') ?? false;
+      _hasNotified = prefs.getBool('cbt_notified') ?? false;
+    });
+  }
+
+  Future<void> _handleLike(Map<String, String> settings) async {
+    if (_hasLiked || _isLiking) return;
+
+    setState(() => _isLiking = true);
+
+    try {
+      final cubit = context.read<CapeToursCubit>();
+      
+      // Request new token if enabled
+      if (settings['TURNSTILE_ENABLED'] == 'true') {
+        _turnstileToken = await _turnstileKey.currentState?.getResponse();
+        if (_turnstileToken == null) {
+          setState(() => _isLiking = false);
+          return;
+        }
+      }
+
+      final result = await cubit.recordGeneralLike(_turnstileToken);
+
+      if (result['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('cbt_liked', true);
+        setState(() {
+          _hasLiked = true;
+          _isLiking = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Thank you! We\'re glad you\'re excited about Cape Best Tours!'),
+              backgroundColor: AppTheme.accentOrange,
+            ),
+          );
+        }
+      } else {
+        setState(() => _isLiking = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to record like. Please try again.')),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() => _isLiking = false);
+    }
+  }
+
+  void _handleNotify(BuildContext context) {
+    if (_hasNotified) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => EmailCaptureDialog(
+        tourTitle: 'Launch of Cape Best Tours',
+        settings: settings,
+        onSubmitted: (email, {turnstileToken}) async {
+          final cubit = this.context.read<CapeToursCubit>();
+          final result = await cubit.subscribeWaitlist(email, turnstileToken: turnstileToken);
+          
+          if (result['success'] == true) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('cbt_notified', true);
+            setState(() => _hasNotified = true);
+            return true;
+          }
+          return false;
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +116,13 @@ class CTASection extends StatelessWidget {
     return BlocBuilder<CapeToursCubit, CapeToursState>(
       builder: (context, state) {
         ImageProvider backgroundImage = const AssetImage('assets/images/portfolio/cape-town-city.webp');
-        if (state is CapeToursLoaded && state.ctaSectionImage != null) {
-          backgroundImage = NetworkImage(state.ctaSectionImage!.url);
+        Map<String, String> settings = {};
+        
+        if (state is CapeToursLoaded) {
+          settings = state.settings;
+          if (state.ctaSectionImage != null) {
+            backgroundImage = NetworkImage(state.ctaSectionImage!.url);
+          }
         }
 
         return Container(
@@ -31,69 +135,76 @@ class CTASection extends StatelessWidget {
               opacity: 0.15,
             ),
           ),
-      padding: EdgeInsets.symmetric(
-        vertical: isMobile ? 80 : 120,
-        horizontal: 20,
-      ),
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: Column(
-            children: [
-              Text(
-                'WE ARE PREPARING TO LAUNCH',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      color: Colors.white,
-                      fontSize: isMobile ? 32 : 56,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
-                    ),
-              ).animate().fadeIn().scale(delay: 200.ms),
-              const SizedBox(height: 24),
-              Text(
-                'We\'re putting the finishing touches on our premium Cape Town experiences. Join our exclusive waitlist and be the first to know when we go live.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: isMobile ? 16 : 20,
-                  height: 1.6,
-                  fontWeight: FontWeight.w300,
-                ),
-              ).animate(delay: 400.ms).fadeIn(),
-              const SizedBox(height: 60),
-              Wrap(
-                spacing: 20,
-                runSpacing: 20,
-                alignment: WrapAlignment.center,
-                children: [
-                  _CTAButton(
-                    text: 'LIKE THE IDEA',
-                    icon: Icons.favorite,
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Thank you! We\'re glad you\'re excited about Cape Best Tours!'),
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: AppTheme.accentOrange,
-                        ),
-                      );
-                    },
-                    isPrimary: true,
-                  ),
-                  _CTAButton(
-                    text: 'GET NOTIFIED',
-                    icon: Icons.notifications_active_outlined,
-                    onPressed: () => launchUrl(Uri.parse('https://wa.me/27123456789?text=Hello! I\'d like to be notified when Cape Best Tours launches.')),
-                    isPrimary: false,
-                  ),
-                ],
-              ).animate(delay: 600.ms).fadeIn().slideY(begin: 0.2, end: 0),
-            ],
+          padding: EdgeInsets.symmetric(
+            vertical: isMobile ? 80 : 120,
+            horizontal: 20,
           ),
-        ),
-      ),
-    );
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Column(
+                children: [
+                  Text(
+                    'WE ARE PREPARING TO LAUNCH',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                          color: Colors.white,
+                          fontSize: isMobile ? 32 : 56,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                  ).animate().fadeIn().scale(delay: 200.ms),
+                  const SizedBox(height: 24),
+                  Text(
+                    'We\'re putting the finishing touches on our premium Cape Town experiences. Join our exclusive waitlist and be the first to know when we go live.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: isMobile ? 16 : 20,
+                      height: 1.6,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ).animate(delay: 400.ms).fadeIn(),
+                  const SizedBox(height: 60),
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _CTAButton(
+                        text: _hasLiked ? 'LIKED ✓' : 'LIKE THE IDEA',
+                        icon: _hasLiked ? Icons.favorite : Icons.favorite_border,
+                        onPressed: (_hasLiked || _isLiking) ? () {} : () => _handleLike(settings),
+                        isPrimary: true,
+                        isLoading: _isLiking,
+                        isDisabled: _hasLiked,
+                      ),
+                      _CTAButton(
+                        text: _hasNotified ? 'NOTIFIED ✓' : 'GET NOTIFIED',
+                        icon: Icons.notifications_active_outlined,
+                        onPressed: _hasNotified ? () {} : () => _handleNotify(context),
+                        isPrimary: false,
+                        isDisabled: _hasNotified,
+                      ),
+                    ],
+                  ).animate(delay: 600.ms).fadeIn().slideY(begin: 0.2, end: 0),
+                  if (settings['TURNSTILE_ENABLED'] == 'true')
+                    Opacity(
+                      opacity: 0,
+                      child: SizedBox(
+                        height: 0,
+                        child: FlutterCloudflareTurnstile(
+                          key: _turnstileKey,
+                          siteKey: settings['TURNSTILE_SITE_KEY'] ?? '',
+                          onTokenRecived: (token) => _turnstileToken = token,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
@@ -104,19 +215,25 @@ class _CTAButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
   final bool isPrimary;
+  final bool isLoading;
+  final bool isDisabled;
 
   const _CTAButton({
     required this.text,
     required this.icon,
     required this.onPressed,
     required this.isPrimary,
+    this.isLoading = false,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
+      onPressed: isDisabled ? null : onPressed,
+      icon: isLoading 
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+          : Icon(icon, size: 20),
       label: Text(
         text,
         style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),

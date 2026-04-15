@@ -19,16 +19,18 @@ class CapeToursLoaded extends CapeToursState {
   final List<Guide> guides;
   final List<SectionImage> heroImages;
   final SectionImage? ctaSectionImage;
+  final Map<String, String> settings;
 
   const CapeToursLoaded({
     required this.tours,
     required this.guides,
     this.heroImages = const [],
     this.ctaSectionImage,
+    this.settings = const {},
   });
 
   @override
-  List<Object?> get props => [tours, guides, heroImages, ctaSectionImage];
+  List<Object?> get props => [tours, guides, heroImages, ctaSectionImage, settings];
 }
 
 class CapeToursError extends CapeToursState {

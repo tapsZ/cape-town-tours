@@ -15,12 +15,14 @@ class CapeToursCubit extends Cubit<CapeToursState> {
       final guides = await _apiService.getGuides();
       final heroImages = await _apiService.getSectionImages('HERO_CAROUSEL');
       final ctaImages = await _apiService.getSectionImages('CTA_BACKGROUND');
+      final settings = await _apiService.getSettings();
 
       emit(CapeToursLoaded(
         tours: tours,
         guides: guides,
         heroImages: heroImages,
         ctaSectionImage: ctaImages.isNotEmpty ? ctaImages.first : null,
+        settings: settings,
       ));
     } catch (e) {
       emit(CapeToursError(e.toString()));
@@ -29,5 +31,13 @@ class CapeToursCubit extends Cubit<CapeToursState> {
 
   Future<bool> createBooking(BookingRequest request) async {
     return await _apiService.createBooking(request);
+  }
+
+  Future<Map<String, dynamic>> recordGeneralLike(String? turnstileToken) async {
+    return await _apiService.recordGeneralLike(turnstileToken);
+  }
+
+  Future<Map<String, dynamic>> subscribeWaitlist(String email, {String? turnstileToken}) async {
+    return await _apiService.subscribeWaitlist(email, turnstileToken: turnstileToken);
   }
 }
