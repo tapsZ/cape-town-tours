@@ -19,30 +19,13 @@ class _CTASectionState extends State<CTASection> {
   bool _hasLiked = false;
   bool _hasNotified = false;
   bool _isLiking = false;
-  CloudflareTurnstile? _turnstile;
+  final _turnstileController = TurnstileController();
   String? _turnstileToken;
 
   @override
   void initState() {
     super.initState();
     _loadDedupeState();
-  }
-
-  @override
-  void dispose() {
-    _turnstile?.dispose();
-    super.dispose();
-  }
-
-  void _ensureTurnstile(Map<String, String> settings) {
-    if (_turnstile != null) return;
-    if (settings['TURNSTILE_ENABLED'] != 'true') return;
-    final siteKey = settings['TURNSTILE_SITE_KEY'];
-    if (siteKey == null || siteKey.isEmpty) return;
-    _turnstile = CloudflareTurnstile.invisible(
-      siteKey: siteKey,
-      onTokenReceived: (token) => _turnstileToken = token,
-    );
   }
 
   Future<void> _loadDedupeState() async {
@@ -54,30 +37,16 @@ class _CTASectionState extends State<CTASection> {
   }
 
   Future<void> _handleLike(Map<String, String> settings) async {
-    debugPrint('LIKE: click hasLiked=$_hasLiked isLiking=$_isLiking '
-        'turnstileEnabled=${settings['TURNSTILE_ENABLED']} '
-        'turnstileReady=${_turnstile != null}');
-    if (_hasLiked || _isLiking) {
-      debugPrint('LIKE: skipped (already liked or in-flight)');
-      if (mounted && _hasLiked) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You already liked this. Thank you!')),
-        );
-      }
-      return;
-    }
+    if (_hasLiked || _isLiking) return;
 
     setState(() => _isLiking = true);
 
     try {
       final cubit = context.read<CapeToursCubit>();
-
+      
       // Request new token if enabled
       if (settings['TURNSTILE_ENABLED'] == 'true') {
-        _ensureTurnstile(settings);
-        _turnstileToken = await _turnstile?.getToken();
-        debugPrint('LIKE: turnstile token='
-            '${_turnstileToken == null ? 'null' : '${_turnstileToken!.substring(0, _turnstileToken!.length < 12 ? _turnstileToken!.length : 12)}...(len=${_turnstileToken!.length})'}');
+        _turnstileToken = await _turnstileController.refreshToken().then((_) => _turnstileController.token);
         if (_turnstileToken == null) {
           setState(() => _isLiking = false);
           debugPrint('LIKE: Turnstile verification check failed (no token produced)');
@@ -90,9 +59,7 @@ class _CTASectionState extends State<CTASection> {
         }
       }
 
-      debugPrint('LIKE: POST /likes (token=${_turnstileToken != null})');
       final result = await cubit.recordGeneralLike(_turnstileToken);
-      debugPrint('LIKE: result=$result');
 
       if (result['success'] == true) {
         final prefs = await SharedPreferences.getInstance();
@@ -113,18 +80,17 @@ class _CTASectionState extends State<CTASection> {
       } else {
         setState(() => _isLiking = false);
         if (mounted) {
-          final msg = result['message']?.toString() ?? 'Failed to record like. Please try again.';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(msg)),
+            const SnackBar(content: Text('Failed to record like. Please try again.')),
           );
         }
       }
-    } catch (e, st) {
-      debugPrint('LIKE error: $e\n$st');
+    } catch (e) {
+      debugPrint('LIKE error: $e');
       setState(() => _isLiking = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Couldn\'t reach server: $e')),
+          const SnackBar(content: Text('Couldn\'t reach server. Please try again.')),
         );
       }
     }
@@ -169,7 +135,6 @@ class _CTASectionState extends State<CTASection> {
           if (state.ctaSectionImage != null) {
             backgroundImage = NetworkImage(state.ctaSectionImage!.url);
           }
-          _ensureTurnstile(settings);
         }
 
         return Container(
@@ -235,6 +200,18 @@ class _CTASectionState extends State<CTASection> {
                       ),
                     ],
                   ).animate(delay: 600.ms).fadeIn().slideY(begin: 0.2, end: 0),
+                  if (settings['TURNSTILE_ENABLED'] == 'true')
+                    Opacity(
+                      opacity: 0,
+                      child: SizedBox(
+                        height: 0,
+                        child: CloudflareTurnstile(
+                          controller: _turnstileController,
+                          siteKey: settings['TURNSTILE_SITE_KEY'] ?? '',
+                          onTokenReceived: (token) => _turnstileToken = token,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
