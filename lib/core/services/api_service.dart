@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../models/tour.dart';
 import '../../models/guide.dart';
@@ -108,18 +109,25 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> recordGeneralLike(String? turnstileToken) async {
+    final uri = Uri.parse('$baseUrl/likes');
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/likes'),
+        uri,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'turnstileToken': turnstileToken}),
       );
+      debugPrint('API recordGeneralLike: ${response.statusCode} ${response.body}');
       if (response.statusCode == 200) {
-        return json.decode(response.body);
+        return json.decode(response.body) as Map<String, dynamic>;
       }
-      return {'success': false};
-    } catch (e) {
-      return {'success': false};
+      return {
+        'success': false,
+        'message': 'Server returned ${response.statusCode}',
+        'body': response.body,
+      };
+    } catch (e, st) {
+      debugPrint('API recordGeneralLike error: $e\n$st');
+      return {'success': false, 'message': 'Network error: $e'};
     }
   }
 
