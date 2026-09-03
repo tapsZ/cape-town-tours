@@ -12,10 +12,30 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
+      # Lets the runner mint a short-lived OIDC token for Infisical.
+      id-token: write
       contents: read
       deployments: write
     name: Build and Deploy
     steps:
+      # --- Secrets, fetched not stored ------------------------------------------------
+      # No Cloudflare or Slack credentials live in this repository. GitHub mints a
+      # short-lived OIDC token, Infisical verifies the signed claims and returns them
+      # as environment variables.
+      #
+      # continue-on-error means an unreachable secret store skips the deploy rather than
+      # failing the run outright.
+      - name: Fetch deploy credentials from Infisical
+        continue-on-error: true
+        uses: Infisical/secrets-action@v1.0.16
+        with:
+          method: oidc
+          identity-id: b80d1b39-6fc8-4f8b-85bc-ae0d90f49368
+          domain: https://secrets.essenceofsale.com
+          project-slug: platform-x1-gy
+          env-slug: prod
+          secret-path: /
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -43,8 +63,8 @@ jobs:
         if: github.event_name == 'push'
         uses: cloudflare/pages-action@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
           projectName: cape-best-tours
           directory: build/web
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
